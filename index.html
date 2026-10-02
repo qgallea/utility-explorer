@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Utility Explorer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div><span class="eyebrow">CONSUMER THEORY</span><h1>Utility Explorer<span class="local-tag">LOCAL · OFFLINE</span></h1></div>
+    <div class="header-actions"><button id="controls-toggle" aria-expanded="false" aria-controls="model-controls">Controls</button><button id="export">Save image</button><button id="reset">Reset all</button></div>
+  </header>
+  <main>
+    <aside class="controls" id="model-controls" aria-label="Model controls">
+      <button id="controls-close">Close controls</button>
+      <section>
+        <h2><span class="section-number">01</span> Utility function</h2>
+        <label for="model">Preferences</label>
+        <select id="model">
+          <option value="cobb">Cobb–Douglas</option><option value="ces">CES</option><option value="linear">Perfect substitutes</option><option value="leontief">Perfect complements</option><option value="quasi">Quasilinear</option>
+        </select>
+        <div class="formula" id="formula"></div>
+        <div class="control-heading"><label for="alpha">Weight α</label><input id="alpha-value" type="number" min="0.05" max="0.95" step="0.01" aria-label="Weight alpha value"></div>
+        <input id="alpha" type="range" min="0.05" max="0.95" step="0.01" value="0.5">
+        <div id="rho-control" hidden><div class="control-heading"><label for="rho">Substitution ρ</label><input id="rho-value" type="number" min="-3" max="0.95" step="0.05" aria-label="Rho value"></div><input id="rho" type="range" min="-3" max="0.95" step="0.05" value="-0.5"><p class="hint">ρ = 0 gives Cobb–Douglas.</p></div>
+        <div class="control-heading"><label for="scale">Utility scale A</label><input id="scale-value" type="number" min="0.1" max="5" step="0.1" aria-label="Utility scale value"></div>
+        <input id="scale" type="range" min="0.1" max="5" step="0.1" value="1">
+      </section>
+      <section>
+        <h2><span class="section-number">02</span> Budget constraint</h2>
+        <div class="formula budget-formula">p<sub>x</sub>x + p<sub>y</sub>y ≤ m</div>
+        <div class="control-heading"><label for="income">Income m</label><input id="income-value" type="number" min="1" max="100" step="0.5" aria-label="Income value"></div>
+        <input id="income" type="range" min="1" max="100" step="0.5" value="10">
+        <div class="price-grid"><div><label for="px">Price p<sub>x</sub></label><input id="px" type="number" min="0.1" max="20" step="0.1" value="1"></div><div><label for="py">Price p<sub>y</sub></label><input id="py" type="number" min="0.1" max="20" step="0.1" value="1"></div></div>
+        <p class="hint">The vertical plane marks p<sub>x</sub>x + p<sub>y</sub>y = m.</p>
+      </section>
+      <section>
+        <h2><span class="section-number">03</span> Indifference curve</h2>
+        <div class="control-heading"><label for="level">Utility level ū</label><input id="level-value" type="number" min="0" step="0.01" aria-label="Utility level value"></div>
+        <input id="level" type="range" min="0" max="12" step="0.01" value="5">
+        <label class="check"><input id="lock" type="checkbox" checked> Keep plane at optimal utility</label>
+        <button class="primary full" id="optimize">Set plane to optimum</button>
+        <p class="hint">Move the level slider to shift the horizontal plane. Its intersection with the surface is an indifference curve.</p>
+      </section>
+      <details open>
+        <summary>Visible layers</summary>
+        <div class="layers">
+          <label class="check"><input id="surface" type="checkbox" checked> Utility surface</label>
+          <label class="check"><input id="plane" type="checkbox" checked> Horizontal utility plane</label>
+          <label class="check"><input id="ic" type="checkbox" checked> Indifference curve + projection</label>
+          <label class="check"><input id="budget" type="checkbox" checked> Vertical budget plane</label>
+          <label class="check"><input id="path" type="checkbox" checked> Utility along the budget line</label>
+          <label class="check"><input id="optimal" type="checkbox" checked> Optimal bundle</label>
+          <label class="check"><input id="feasible" type="checkbox" checked> Affordable region</label>
+        </div>
+        <div class="control-heading"><label for="opacity">Surface opacity</label><output id="opacity-value">85%</output></div><input id="opacity" type="range" min="0.15" max="1" step="0.05" value="0.85">
+      </details>
+      <details><summary>Plot range</summary>
+        <label class="check"><input id="auto-range" type="checkbox"> Fit axes to budget intercepts</label>
+        <div class="price-grid"><div><label for="xmax">x maximum</label><input id="xmax" type="number" min="0.1" max="2000" step="0.5" value="11.2"></div><div><label for="ymax">y maximum</label><input id="ymax" type="number" min="0.1" max="2000" step="0.5" value="11.2"></div></div>
+      </details>
+    </aside>
+    <section class="scene-panel" aria-label="Interactive three-dimensional plot">
+      <div class="plot-heading"><div><h2>Utility in three dimensions</h2><p id="equation"></p></div><span class="live-dot">Live</span></div>
+      <div class="view-toolbar" aria-label="Camera controls">
+        <div class="button-group"><button data-view="perspective" class="selected">3D</button><button data-view="top">Top</button><button data-view="front">Front</button><button data-view="side">Side</button></div>
+        <div class="button-group"><button id="rotate" class="selected" aria-pressed="true">Rotate</button><button id="pan" aria-pressed="false">Pan</button></div>
+        <div class="button-group"><button id="zoom-in" aria-label="Zoom in">＋</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="home">Reset view</button></div>
+      </div>
+      <div id="plot3d" role="img" aria-label="Rotatable 3D utility surface with an indifference plane, budget plane, and optimum"></div>
+      <div id="plot-error" role="alert" hidden></div>
+      <div class="plot-footer"><span>Drag to rotate · Scroll to zoom · Choose Pan to move</span><button id="fullscreen">Full screen</button></div>
+      <div class="legend"><span><i class="surface-key"></i>Utility surface</span><span><i class="ic-key"></i>Fixed utility / IC</span><span><i class="budget-key"></i>Budget / BC</span><span><i class="optimum-key"></i>Optimum</span></div>
+      <p class="range-warning" id="range-warning" hidden></p>
+    </section>
+    <aside class="inspector">
+      <section class="projection-panel"><h2>The same choice in 2D</h2><p class="hint">Projection onto the goods plane</p><div id="plot2d" role="img" aria-label="Indifference curve and budget line in goods space"></div></section>
+      <section class="result-panel" aria-live="polite" aria-atomic="true">
+        <div class="result-title"><h2>Optimal bundle</h2><span id="solution-type">Interior</span></div>
+        <div class="metrics"><div><span>x*</span><strong id="opt-x">5</strong></div><div><span>y*</span><strong id="opt-y">5</strong></div><div><span>U*</span><strong id="opt-u">5</strong></div></div>
+        <dl><div><dt>Expenditure</dt><dd id="expenditure"></dd></div><div><dt>MRS at optimum</dt><dd id="mrs"></dd></div><div><dt>Price ratio p<sub>x</sub> / p<sub>y</sub></dt><dd id="price-ratio"></dd></div></dl>
+        <p id="solution-note"></p>
+      </section>
+      <section class="level-panel"><div class="result-title"><h2>Selected utility level</h2><strong id="selected-level"></strong></div><p id="level-status" aria-live="polite"></p></section>
+      <details class="reading"><summary>How to read the geometry</summary><p>The surface gives U(x, y). The horizontal plane fixes utility at ū. Their intersection projects to an indifference curve in 2D.</p><p>The budget plane rises vertically from the budget line. The orange curve on it gives utility along that line. Its highest point is the optimum.</p><p>For a smooth interior solution, the optimal indifference curve is tangent to the budget line: MRS = p<sub>x</sub>/p<sub>y</sub>. Corners and kinks have different optimality conditions.</p><p>Goods are nonnegative; all included preferences are increasing. The optimum exhausts the budget. Utility units and vertical scaling do not affect the optimal bundle.</p></details>
+    </aside>
+  </main>
+  <script src="vendor/plotly-3.1.0.min.js"></script>
+  <script src="model.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
